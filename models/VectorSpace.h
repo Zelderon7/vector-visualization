@@ -152,5 +152,6 @@ inline void VectorSpace<Vector2D>::draw(sf::RenderWindow& window) {
     }
 }
 
+// Smth
 
 #endif //VECTOR_CALCULATOR_VECTORSPACE_H
