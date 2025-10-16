@@ -7,8 +7,8 @@ set(CMAKE_CXX_STANDARD 20)
 find_package(SFML 3.0 COMPONENTS Graphics Window System REQUIRED)
 
 add_executable(vector_calculator main.cpp
-        models/Vector2D.cpp
-        models/Vector2D.h
+        models/VectorN.tpp
+        models/VectorN.h
         models/VectorSpace.h)
 
 # Link SFML 3 libraries with the SFML:: namespace

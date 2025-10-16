@@ -1,5 +1,5 @@
 #include <SFML/Graphics.hpp>
-#include "models/Vector2D.h"
+#include "models/VectorN.h"
 #include "models/VectorSpace.h"
 
 std::vector<std::pair<sf::Vertex, sf::Vertex>> getRandomLines(sf::RenderWindow& window);
@@ -47,19 +47,19 @@ int main() {
 void RenderScreen(sf::RenderWindow& window) {
     window.clear(sf::Color::Black);
 
-    VectorSpace<Vector2D> space;
+    VectorSpace<VectorN<float, 2>> space;
 
-    Vector2D vec = Vector2D(3, 5, sf::Color::Red);
+    VectorN vec = VectorN<float, 2>({3, 5}, sf::Color::Red);
 
-    Vector2D vec2 = Vector2D(1, 0, sf::Color::Yellow, &vec);
+    VectorN vec2 = VectorN<float, 2>({1, 0}, sf::Color::Yellow, &vec);
 
-    Vector2D vec3 = vec + vec2;
+    VectorN vec3 = vec + vec2;
     vec3.setColor(sf::Color::Blue);
 
-    Vector2D vec4 = {1, 2.5, sf::Color::Red};
+    VectorN<float, 2> vec4 = {{1, 2.5}, sf::Color::Red};
     vec4.setPrevious(&vec3);
 
-    Vector2D vec5 = vec3 + vec4;
+    VectorN vec5 = vec3 + vec4;
     vec5.setColor(sf::Color::White);
 
     space.add(&vec);
