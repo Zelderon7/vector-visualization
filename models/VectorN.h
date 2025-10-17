@@ -55,7 +55,7 @@ public:
     [[nodiscard]] VectorN operator -(const VectorN& other) const;
 
     [[nodiscard]] T magnitude() const;
-    [[nodiscard]] VectorN dot(const VectorN& other) const;
+    [[nodiscard]] T dot(const VectorN& other) const;
     [[nodiscard]] VectorN normalized() const;
 
     [[nodiscard]] sf::Vector2<T> getStartPos() const requires(N == 2);

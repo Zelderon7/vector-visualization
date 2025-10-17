@@ -4,9 +4,6 @@
 
 std::vector<std::pair<sf::Vertex, sf::Vertex>> getRandomLines(sf::RenderWindow& window);
 
-int prevFrame = -1;
-int frame = 0;
-const int numFrames = 5;
 float scale = 80;
 
 void RenderScreen(sf::RenderWindow& window);
@@ -23,21 +20,7 @@ int main() {
             if (event->is<sf::Event::KeyPressed>()) {
                 const auto& key = event->getIf<sf::Event::KeyPressed>();
 
-                if (key->code == sf::Keyboard::Key::Right) {
-                    frame++;
-                    frame %= (numFrames+1);
-                }
-
-                if (key->code == sf::Keyboard::Key::Left) {
-                    frame--;
-                    if (frame < 0) frame = 0;
-                }
             }
-        }
-
-        if (prevFrame != frame) {
-            RenderScreen(window);
-            prevFrame = frame;
         }
     }
 
@@ -51,7 +34,7 @@ void RenderScreen(sf::RenderWindow& window) {
 
     VectorN vec = VectorN<float, 2>({3, 5}, sf::Color::Red);
 
-    VectorN vec2 = VectorN<float, 2>({1, 0}, sf::Color::Yellow, &vec);
+    VectorN vec2 = VectorN({1, 0}, sf::Color::Yellow, &vec);
 
     VectorN vec3 = vec + vec2;
     vec3.setColor(sf::Color::Blue);

@@ -17,11 +17,11 @@ VectorN<T, N> VectorN<T, N>::operator*(float scalar) const {
 template<typename T, std::size_t N>
 VectorN<T, N> VectorN<T, N>::operator+(const VectorN &other) const {
 
-    T res[N];
+    std::array<T, N> res;
     for (int i = 0; i < N; i++)
         res[i] = data[i] + other.data[i];
 
-    return VectorN<T, N>(&res);
+    return VectorN<T, N>(res);
 }
 
 template<typename T, std::size_t N>
@@ -44,7 +44,14 @@ T VectorN<T, N>::magnitude() const {
 }
 
 template<typename T, std::size_t N>
-VectorN<T, N> VectorN<T, N>::dot(const VectorN &other) const {
+T VectorN<T, N>::dot(const VectorN &other) const {
+
+    T result = T(0);
+    for (int i = 0; i < N; i++) {
+        result += this->data[i] * other.data[i];
+    }
+
+    return result;
 }
 
 template<typename T, std::size_t N>
