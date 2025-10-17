@@ -2,7 +2,6 @@
 // Created by zelderon on 10/7/25.
 //
 
-#include <vector>
 #include <cmath>
 #include <SFML/Graphics.hpp>
 
@@ -12,6 +11,15 @@ VectorN<T, N> VectorN<T, N>::operator*(float scalar) const {
         i *= scalar;
 
     return *this;
+}
+
+template<typename T, std::size_t N>
+VectorN<T, 3> VectorN<T, N>::operator*(const VectorN &other) const requires (N == 3) {
+    VectorN<T, 3> result;
+    result.data[0] = data[1] * other.data[2] - data[2] * other.data[1];
+    result.data[1] = data[2] * other.data[0] - data[0] * other.data[2];
+    result.data[2] = data[0] * other.data[1] - data[1] * other.data[0];
+    return result;
 }
 
 template<typename T, std::size_t N>
@@ -80,3 +88,22 @@ sf::Vector2<T> VectorN<T, N>::getEndPos() const requires (N == 2) {
     return getStartPos() + static_cast<sf::Vector2<T>>(*this);
 }
 
+template<typename T, std::size_t N>
+bool VectorN<T, N>::is_in_plane(const VectorN *n, T epsilon) const requires(N == 3){
+    auto difference = this->dot(n);
+
+    return difference <= epsilon;
+}
+
+template<typename T, std::size_t N>
+VectorN<T, 2> VectorN<T, N>::get_plane_coordinates(const VectorN* b1, const VectorN* b2, const VectorN *n) const requires(N==3)
+{
+    if (!this->is_in_plane(n)) {
+        throw std::invalid_argument("Vector is not in the plane defined by n");
+    }
+
+    auto alpha = this->dot(*b1);
+    auto beta = this->dot(*b2);
+
+    return VectorN<T, 2>(alpha, beta);
+}

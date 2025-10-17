@@ -17,6 +17,16 @@ struct is_vector2<VectorN<U, 2>> : std::true_type {};
 template<typename T>
 inline constexpr bool is_vector2_v = is_vector2<T>::value;
 
+// Trait to detect VectorN<U, 3>
+template<typename T>
+struct is_vector3 : std::false_type {};
+
+template<typename U>
+struct is_vector3<VectorN<U, 3>> : std::true_type {};
+
+template<typename T>
+inline constexpr bool is_vector3_v = is_vector3<T>::value;
+
 // Helper function (not part of class)
 inline sf::Vector2<float> flip_y(const sf::Vector2<float>* vec, const float window_height) {
     return {vec->x, window_height - vec->y};
@@ -47,8 +57,21 @@ public:
     ~VectorSpace();
     void add(const T* vec);
     void remove(const T* vec);
+    void clear() {
+        vectors.clear();
+    }
+
     void draw(sf::RenderWindow& window) requires is_vector2_v<T>;
     void draw_arrow(sf::RenderWindow& window, const T* vec) requires is_vector2_v<T>;
+
+    static T get_plane_normal(const T *v1, const T *v2) requires is_vector3_v<T>;
+
+    static std::pair<T, T> get_plane_basis(const T *v1, const T *n)requires is_vector3_v<T>;
+
+    void get_plane_as_vector_space(const T *n, VectorSpace<VectorN<typename T::value_type, 2>> &out_plane_space) const requires is_vector3_v<T> {
+
+
+    }
 };
 
 // Template implementations must be in header
@@ -73,13 +96,7 @@ void VectorSpace<T>::remove(const T* vec) {
     }
 }
 
-//2D Vector Space
-
-// Specializations for Vector2D
-
-
-//3d Vector Space
-
 #include "VectorSpace_2.tpp"
+#include  "VectorSpace_G.tpp"
 
 #endif //VECTOR_CALCULATOR_VECTORSPACE_H

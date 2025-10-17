@@ -1,3 +1,4 @@
+#include <iostream>
 #include <SFML/Graphics.hpp>
 #include "models/VectorN.h"
 #include "models/VectorSpace.h"
@@ -20,6 +21,18 @@ int main() {
             if (event->is<sf::Event::KeyPressed>()) {
                 const auto& key = event->getIf<sf::Event::KeyPressed>();
 
+                VectorN<float, 3> vec = VectorN<float, 3>({1, 1, 1});
+                VectorN<float, 3> vec2 = VectorN<float, 3>({1, 2, 1});
+
+                VectorSpace<VectorN<float, 3>> space;
+                space.add(&vec);
+                space.add(&vec2);
+
+                auto normal = VectorSpace<VectorN<float, 3>>::get_plane_normal(&vec, &vec2);
+
+                std::cout << std::format("Normal = [{}, {}, {}]", normal[0], normal[1], normal[2]) << std::endl;
+
+                //RenderScreen(window);
             }
         }
     }
@@ -54,4 +67,16 @@ void RenderScreen(sf::RenderWindow& window) {
     space.draw(window);
 
     window.display();
+}
+
+void Render3DScreen(sf::RenderWindow& window) {
+    VectorSpace<VectorN<float, 3>> space;
+
+    VectorN<float, 3> vec = VectorN<float, 3>({1, 1, 1});
+    VectorN<float, 3> vec2 = VectorN<float, 3>({1, 2, 1});
+
+    space.add(&vec);
+    space.add(&vec2);
+
+
 }

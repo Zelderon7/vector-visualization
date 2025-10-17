@@ -16,6 +16,7 @@ private:
     const VectorN* previous;
 
 public:
+    using value_type = T;
     //Constructors
     VectorN(const std::array<T, N> &data, sf::Color color, const VectorN* previous)
         : data{data}, color{color}, previous{previous} {}
@@ -51,6 +52,8 @@ public:
 
     //Operators
     [[nodiscard]] VectorN operator *(float scalar) const;
+    // Cross product only available for 3D vectors
+    [[nodiscard]] VectorN<T, 3> operator*(const VectorN& other) const requires (N == 3);
     [[nodiscard]] VectorN operator +(const VectorN& other) const;
     [[nodiscard]] VectorN operator -(const VectorN& other) const;
 
@@ -61,7 +64,19 @@ public:
     [[nodiscard]] sf::Vector2<T> getStartPos() const requires(N == 2);
     [[nodiscard]] sf::Vector2<T> getEndPos() const requires(N == 2);
 
+    [[nodiscard]] bool is_in_plane(const VectorN *n, T epsilon = 1e-6) const requires(N==3);
+
+    [[nodiscard]] VectorN<T, 2> get_plane_coordinates(const VectorN* b1, const VectorN* b2, const VectorN *n) const requires(N==3);
+
     [[nodiscard]] explicit operator sf::Vector2f() const requires(N == 2){ return {this->data[0], this->data[1]}; }
+
+    bool is_zero() const {
+        for (std::size_t i = 0; i < N; ++i) {
+            if (data[i] != 0)
+                return false;
+        }
+        return true;
+    }
 };
 
 #include "VectorN.tpp"
