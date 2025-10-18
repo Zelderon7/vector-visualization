@@ -62,6 +62,16 @@ private:
 
 #pragma region Public Members
 public:
+
+#pragma region -- Type alias
+
+    // Helper alias
+    using value_type = typename T::value_type;
+    using Vector2D = VectorN<value_type, 2>;
+    using VectorSpace2D = VectorSpace<Vector2D>;
+
+#pragma endregion
+
     static constexpr float ARROW_SIZE = 15;
 
     VectorSpace();
@@ -79,9 +89,9 @@ public:
 
     static std::pair<T, T> get_plane_basis(const T *v1, const T *n)requires is_vector3_v<T>;
 
-    void get_plane_as_vector_space(const T *n, VectorSpace<VectorN<typename T::value_type, 2>> &out_plane_space) const requires is_vector3_v<T>;
-    void get_plane_as_vector_space(const T *n, std::vector<const T*>& vecs,
-        VectorSpace<VectorN<typename T::value_type, 2>> &out_plane_space) const requires is_vector3_v<T>;
+    void get_plane_as_vector_space(const T *n, VectorSpace2D &out_plane_space) const requires is_vector3_v<T>;
+    static void get_plane_as_vector_space(const T *n, const std::vector<const T*>& vecs,
+        VectorSpace2D &out_plane_space) requires is_vector3_v<T>;
 #pragma endregion
 };
 
@@ -163,6 +173,9 @@ template<typename T>
 void VectorSpace<T>::draw_arrow_head(sf::RenderWindow& window, const T* vec,
     const sf::Vector2<float>* end) requires is_vector2_v<T> {
 
+    if (vec->is_zero())
+        return;
+
     const sf::Vector2 norm = (static_cast<sf::Vector2<float>>(*vec)).normalized();
     const sf::Vector2 arrow_base = {norm.y, -norm.x};
     const sf::Vector2 base_center = *end - (norm * ARROW_SIZE);
@@ -183,6 +196,9 @@ template<typename T>
 void VectorSpace<T>::draw_arrow(sf::RenderWindow &window, const T* vec, const sf::Vector2<float> &offset, float scale)
     requires is_vector2_v<T> {
 
+    if (vec->is_zero())
+        return;
+
     sf::Vector2<float> start = (vec->getStartPos() + offset) * scale;
     sf::Vector2<float> end = (vec->getEndPos() + offset) * scale;
 
@@ -192,6 +208,10 @@ void VectorSpace<T>::draw_arrow(sf::RenderWindow &window, const T* vec, const sf
 
 template<typename T>
 void VectorSpace<T>::draw_arrow(sf::RenderWindow& window, const T* vec) requires is_vector2_v<T> {
+
+    if (vec->is_zero())
+        return;
+
     float minX, maxX, minY, maxY;
     find_bounds(&minX, &minY, &maxX, &maxY);
     sf::Vector2<float> offset;
@@ -209,6 +229,8 @@ inline void VectorSpace<T>::draw(sf::RenderWindow& window) requires is_vector2_v
     const float scale = find_scale(window, &minX, &minY, &maxX, &maxY, &offset);
 
     for (const auto vector : vectors) {
+        if (vector->is_zero())
+            return;
         draw_arrow(window, vector, offset, scale);
     }
 }
@@ -223,20 +245,20 @@ T VectorSpace<T>::get_plane_normal(const T *v1, const T *v2) requires is_vector3
 template<typename T>
 std::pair<T, T> VectorSpace<T>::get_plane_basis(const T *v1, const T *n) requires is_vector3_v<T> {
     T u = *v1;
-    u.normalized();
+    u = u.normalized();
 
-    T v = n * u;
-    v.normalized();
+    T v = (*n) * u;
+    v = v.normalized();
 
     return {u, v};
 }
 
 template<typename T>
-void VectorSpace<T>::get_plane_as_vector_space(const T *n, std::vector<const T*>& vecs,
-    VectorSpace<VectorN<typename T::value_type, 2>> &out_plane_space) const requires is_vector3_v<T> {
+void VectorSpace<T>::get_plane_as_vector_space(const T *n, const std::vector<const T *> &vecs, VectorSpace2D &out_plane_space)
+    requires is_vector3_v<T> {
 
     out_plane_space.clear();
-    VectorN<typename T::value_type, 2> *a = nullptr, *b = nullptr;
+    const T *a = nullptr, *b = nullptr;
 
     for (const T* vec : vecs) {
         if (vec->is_zero())
@@ -251,21 +273,25 @@ void VectorSpace<T>::get_plane_as_vector_space(const T *n, std::vector<const T*>
         }
     }
 
-    std::pair<T, T> plane_basis = get_plane_basis(a, b);
+    if (a == nullptr || b == nullptr) {
+        throw std::runtime_error("Need at least 2 non-zero vectors to define a plane");
+    }
+
+    std::pair<T, T> plane_basis = get_plane_basis(a, n);
 
     for (const T* vec : vecs) {
         if (vec->is_in_plane(n)) {
-            VectorN<typename T::value_type, 2> projected = vec->get_plane_coordinates(plane_basis.a, plane_basis.b, n);
-            out_plane_space.add(projected);
+            VectorN<typename T::value_type, 2> projected = vec->get_plane_coordinates(&plane_basis.first, &plane_basis.second, n);
+            out_plane_space.add(new VectorN<typename T::value_type, 2>(projected));
         }
     }
 }
 
 template<typename T>
-void VectorSpace<T>::get_plane_as_vector_space(const T *n,
-    VectorSpace<VectorN<typename T::value_type, 2>> &out_plane_space) const requires is_vector3_v<T> {
+void VectorSpace<T>::get_plane_as_vector_space(const T *n, VectorSpace2D &out_plane_space)
+const requires is_vector3_v<T> {
 
-    get_plane_as_vector_space(n, vectors, out_plane_space);
+    VectorSpace::get_plane_as_vector_space(n, vectors, out_plane_space);
 }
 
 #pragma endregion

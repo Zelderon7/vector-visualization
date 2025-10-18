@@ -186,7 +186,7 @@ VectorN<T, 3> VectorN<T, N>::operator*(const VectorN &other) const requires (N =
 
 template<typename T, std::size_t N>
 bool VectorN<T, N>::is_in_plane(const VectorN *n, T epsilon) const requires(N == 3){
-    auto difference = this->dot(n);
+    auto difference = this->dot(*n);
 
     return difference <= epsilon;
 }
@@ -201,7 +201,7 @@ VectorN<T, 2> VectorN<T, N>::get_plane_coordinates(const VectorN* b1, const Vect
     auto alpha = this->dot(*b1);
     auto beta = this->dot(*b2);
 
-    return VectorN<T, 2>(alpha, beta);
+    return VectorN<T, 2>({alpha, beta});
 }
 
 #pragma endregion

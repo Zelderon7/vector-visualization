@@ -8,6 +8,7 @@ std::vector<std::pair<sf::Vertex, sf::Vertex>> getRandomLines(sf::RenderWindow& 
 float scale = 80;
 
 void RenderScreen(sf::RenderWindow& window);
+void Render3DScreen(sf::RenderWindow& window);
 
 int main() {
     sf::RenderWindow window(sf::VideoMode({800, 600}), "Vector Calculator");
@@ -31,6 +32,8 @@ int main() {
                 auto normal = VectorSpace<VectorN<float, 3>>::get_plane_normal(&vec, &vec2);
 
                 std::cout << std::format("Normal = [{}, {}, {}]", normal[0], normal[1], normal[2]) << std::endl;
+
+                Render3DScreen(window);
 
                 //RenderScreen(window);
             }
@@ -80,4 +83,11 @@ void Render3DScreen(sf::RenderWindow& window) {
 
     window.clear(sf::Color::Black);
 
+    VectorN<float, 3> normal = VectorSpace<VectorN<float, 3>>::get_plane_normal(&vec, &vec2);
+    VectorSpace<VectorN<float, 2>> projected;
+    space.get_plane_as_vector_space(&normal, projected);
+
+    projected.draw(window);
+
+    window.display();
 }
