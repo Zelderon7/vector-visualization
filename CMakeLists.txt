@@ -7,7 +7,6 @@ set(CMAKE_CXX_STANDARD 20)
 find_package(SFML 3.0 COMPONENTS Graphics Window System REQUIRED)
 
 add_executable(vector_calculator main.cpp
-        models/VectorN.tpp
         models/VectorN.h
         models/VectorSpace.h)
 

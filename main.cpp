@@ -78,5 +78,6 @@ void Render3DScreen(sf::RenderWindow& window) {
     space.add(&vec);
     space.add(&vec2);
 
+    window.clear(sf::Color::Black);
 
 }

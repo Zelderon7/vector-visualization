@@ -1,5 +1,4 @@
-#ifndef VECTOR_CALCULATOR_VECTORSPACE_H
-#define VECTOR_CALCULATOR_VECTORSPACE_H
+#pragma once
 
 #include <vector>
 #include <algorithm>
@@ -80,10 +79,9 @@ public:
 
     static std::pair<T, T> get_plane_basis(const T *v1, const T *n)requires is_vector3_v<T>;
 
-    void get_plane_as_vector_space(const T *n, VectorSpace<VectorN<typename T::value_type, 2>> &out_plane_space) const requires is_vector3_v<T> {
-
-
-    }
+    void get_plane_as_vector_space(const T *n, VectorSpace<VectorN<typename T::value_type, 2>> &out_plane_space) const requires is_vector3_v<T>;
+    void get_plane_as_vector_space(const T *n, std::vector<const T*>& vecs,
+        VectorSpace<VectorN<typename T::value_type, 2>> &out_plane_space) const requires is_vector3_v<T>;
 #pragma endregion
 };
 
@@ -233,6 +231,41 @@ std::pair<T, T> VectorSpace<T>::get_plane_basis(const T *v1, const T *n) require
     return {u, v};
 }
 
-#pragma endregion
+template<typename T>
+void VectorSpace<T>::get_plane_as_vector_space(const T *n, std::vector<const T*>& vecs,
+    VectorSpace<VectorN<typename T::value_type, 2>> &out_plane_space) const requires is_vector3_v<T> {
 
-#endif //VECTOR_CALCULATOR_VECTORSPACE_H
+    out_plane_space.clear();
+    VectorN<typename T::value_type, 2> *a = nullptr, *b = nullptr;
+
+    for (const T* vec : vecs) {
+        if (vec->is_zero())
+            continue;
+
+        if (a == nullptr) {
+            a = vec;
+        } else if (b == nullptr) {
+            b = vec;
+        } else {
+            break;
+        }
+    }
+
+    std::pair<T, T> plane_basis = get_plane_basis(a, b);
+
+    for (const T* vec : vecs) {
+        if (vec->is_in_plane(n)) {
+            VectorN<typename T::value_type, 2> projected = vec->get_plane_coordinates(plane_basis.a, plane_basis.b, n);
+            out_plane_space.add(projected);
+        }
+    }
+}
+
+template<typename T>
+void VectorSpace<T>::get_plane_as_vector_space(const T *n,
+    VectorSpace<VectorN<typename T::value_type, 2>> &out_plane_space) const requires is_vector3_v<T> {
+
+    get_plane_as_vector_space(n, vectors, out_plane_space);
+}
+
+#pragma endregion
