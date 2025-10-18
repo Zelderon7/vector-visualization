@@ -9,6 +9,7 @@ float scale = 80;
 
 void RenderScreen(sf::RenderWindow& window);
 void Render3DScreen(sf::RenderWindow& window);
+void Zad1(sf::RenderWindow& window);
 
 int main() {
     sf::RenderWindow window(sf::VideoMode({800, 600}), "Vector Calculator");
@@ -22,18 +23,7 @@ int main() {
             if (event->is<sf::Event::KeyPressed>()) {
                 const auto& key = event->getIf<sf::Event::KeyPressed>();
 
-                VectorN<float, 3> vec = VectorN<float, 3>({1, 1, 1});
-                VectorN<float, 3> vec2 = VectorN<float, 3>({1, 2, 1});
-
-                VectorSpace<VectorN<float, 3>> space;
-                space.add(&vec);
-                space.add(&vec2);
-
-                auto normal = VectorSpace<VectorN<float, 3>>::get_plane_normal(&vec, &vec2);
-
-                std::cout << std::format("Normal = [{}, {}, {}]", normal[0], normal[1], normal[2]) << std::endl;
-
-                Render3DScreen(window);
+                Zad1(window);
 
                 //RenderScreen(window);
             }
@@ -41,6 +31,19 @@ int main() {
     }
 
     return 0;
+}
+
+void TestFindNormal() {
+    VectorN<float, 3> vec = VectorN<float, 3>({1, 1, 1});
+    VectorN<float, 3> vec2 = VectorN<float, 3>({1, 2, 1});
+
+    VectorSpace<VectorN<float, 3>> space;
+    space.add(&vec);
+    space.add(&vec2);
+
+    auto normal = VectorSpace<VectorN<float, 3>>::get_plane_normal(&vec, &vec2);
+
+    std::cout << std::format("Normal = [{}, {}, {}]", normal[0], normal[1], normal[2]) << std::endl;
 }
 
 void RenderScreen(sf::RenderWindow& window) {
@@ -91,3 +94,38 @@ void Render3DScreen(sf::RenderWindow& window) {
 
     window.display();
 }
+
+void Zad1(sf::RenderWindow& window) {
+    //Given A =(2, -3, 0) B =(3, 0, 4) and C =(3, 2, 0) Find the type of ABC
+    using V3 = VectorN<float, 3>;
+    using V2 = VectorN<float, 2>;
+
+    V3 A = V3({2, -3, 0});
+    V3 B = V3({3, 0, 4});
+    V3 C = V3({3, 2, 0});
+
+    V3 BA = A - B;
+    V3 BC = C - B;
+    V3 CA = A - C;
+
+    BA.setColor(sf::Color::Red);
+    BC.setColor(sf::Color::Blue);
+    CA.setColor(sf::Color::White);
+
+    const std::vector<V3 *> triangle = {&BC, &BA, &CA};
+
+    VectorSpace<V2> projected;
+    V3 normal = VectorSpace<V3>::get_plane_normal(&BC, &CA);
+    VectorSpace<V3>::get_plane_as_vector_space(&normal, triangle, projected);
+
+    auto ca = projected[2];
+    auto bc = projected[0];
+
+    ca->setPrevious(bc);
+
+    window.clear(sf::Color::Black);
+    projected.draw(window);
+    window.display();
+}
+
+

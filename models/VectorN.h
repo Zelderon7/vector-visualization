@@ -30,6 +30,11 @@ public:
     VectorN(const std::array<T, N> &data, sf::Color color)
         :VectorN(data, color, nullptr) {}
 
+    VectorN(std::initializer_list<T> init)
+        : VectorN(std::array<T, N>(), sf::Color::White) {
+        std::copy_n(init.begin(), std::min(init.size(), N), data.begin());
+    }
+
     explicit VectorN(const std::array<T, N> &data)
         :VectorN(data, sf::Color::White){}
 
@@ -54,6 +59,9 @@ public:
     void setColor(sf::Color color){this->color = color;}
     void setPrevious(const VectorN* previous){this->previous = previous;}
 
+    [[nodiscard]] const std::array<T, N>& getData() const {
+        return data;
+    }
     [[nodiscard]] sf::Color getColor() const {return color;}
     [[nodiscard]] const VectorN* getPrevious() const {return this->previous;}
 
@@ -98,10 +106,12 @@ public:
 
 template<typename T, std::size_t N>
 VectorN<T, N> VectorN<T, N>::operator*(float scalar) const {
-    for (auto i : this->data)
-        i *= scalar;
 
-    return *this;
+    std::array<T, N> res;
+    for (int i = 0; i < N; i++)
+        res[i] = this[i] * scalar;
+
+    return VectorN<T, N>(res, this->getColor());
 }
 
 
@@ -118,11 +128,11 @@ VectorN<T, N> VectorN<T, N>::operator+(const VectorN &other) const {
 template<typename T, std::size_t N>
 VectorN<T, N> VectorN<T, N>::operator-(const VectorN &other) const {
 
-    T res[N];
+    std::array<T, N> res;
     for (int i = 0; i < N; i++)
         res[i] = data[i] - other.data[i];
 
-    return VectorN<T, N>(&res);
+    return VectorN<T, N>(res);
 }
 
 template<typename T, std::size_t N>

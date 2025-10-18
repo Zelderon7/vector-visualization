@@ -43,7 +43,7 @@ template <typename T>
 class VectorSpace {
 #pragma region Private Members
 private:
-    std::vector<const T*> vectors;
+    std::vector<T*> vectors;
     void find_bounds(float* minX, float* minY, float* maxX, float* maxY) requires is_vector2_v<T>;
 
     static float find_scale(const sf::RenderWindow& window, const float* min_x, const float* min_y, const float* max_x,
@@ -76,10 +76,18 @@ public:
 
     VectorSpace();
     ~VectorSpace();
-    void add(const T* vec);
+    void add(T* vec);
     void remove(const T* vec);
     void clear() {
         vectors.clear();
+    }
+
+    [[nodiscard]] T* operator[](std::size_t index) {
+        return vectors[index];
+    }
+
+    [[nodiscard]] const T* operator[](std::size_t index) const {
+        return vectors[index];
     }
 
     void draw(sf::RenderWindow& window) requires is_vector2_v<T>;
@@ -90,7 +98,7 @@ public:
     static std::pair<T, T> get_plane_basis(const T *v1, const T *n)requires is_vector3_v<T>;
 
     void get_plane_as_vector_space(const T *n, VectorSpace2D &out_plane_space) const requires is_vector3_v<T>;
-    static void get_plane_as_vector_space(const T *n, const std::vector<const T*>& vecs,
+    static void get_plane_as_vector_space(const T *n, const std::vector<T*>& vecs,
         VectorSpace2D &out_plane_space) requires is_vector3_v<T>;
 #pragma endregion
 };
@@ -109,7 +117,7 @@ VectorSpace<T>::~VectorSpace() {
 }
 
 template<typename T>
-void VectorSpace<T>::add(const T* vec) {
+void VectorSpace<T>::add(T* vec) {
     vectors.push_back(vec);
 }
 
@@ -130,14 +138,14 @@ float VectorSpace<T>::find_scale(const sf::RenderWindow &window, const float* mi
 
     const float scale = std::min(
         window.getSize().x / (*max_x - *min_x),
-        window.getSize().y / (*max_y - *min_y));
+        window.getSize().y/ (*max_y - *min_y));
 
-    *offset = sf::Vector2(*min_x, *min_y) * -scale;
+    *offset = sf::Vector2(*min_x, *min_y) * -1.f;
     return scale;
 }
 
 template<typename T>
-inline void VectorSpace<T>::find_bounds(float* minX, float* minY, float* maxX, float* maxY) requires is_vector2_v<T> {
+void VectorSpace<T>::find_bounds(float* minX, float* minY, float* maxX, float* maxY) requires is_vector2_v<T> {
 
     *minX = 0;
     *minY = 0;
@@ -221,7 +229,7 @@ void VectorSpace<T>::draw_arrow(sf::RenderWindow& window, const T* vec) requires
 }
 
 template<typename T>
-inline void VectorSpace<T>::draw(sf::RenderWindow& window) requires is_vector2_v<T> {
+void VectorSpace<T>::draw(sf::RenderWindow& window) requires is_vector2_v<T> {
 
     float minX, maxX, minY, maxY;
     find_bounds(&minX, &minY, &maxX, &maxY);
@@ -254,7 +262,7 @@ std::pair<T, T> VectorSpace<T>::get_plane_basis(const T *v1, const T *n) require
 }
 
 template<typename T>
-void VectorSpace<T>::get_plane_as_vector_space(const T *n, const std::vector<const T *> &vecs, VectorSpace2D &out_plane_space)
+void VectorSpace<T>::get_plane_as_vector_space(const T *n, const std::vector<T *> &vecs, VectorSpace2D &out_plane_space)
     requires is_vector3_v<T> {
 
     out_plane_space.clear();
@@ -282,7 +290,8 @@ void VectorSpace<T>::get_plane_as_vector_space(const T *n, const std::vector<con
     for (const T* vec : vecs) {
         if (vec->is_in_plane(n)) {
             VectorN<typename T::value_type, 2> projected = vec->get_plane_coordinates(&plane_basis.first, &plane_basis.second, n);
-            out_plane_space.add(new VectorN<typename T::value_type, 2>(projected));
+            auto v = new VectorN<typename T::value_type, 2>(projected.getData(), vec->getColor());
+            out_plane_space.add(v);
         }
     }
 }
