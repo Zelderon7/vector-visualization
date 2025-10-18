@@ -235,7 +235,4 @@ std::pair<T, T> VectorSpace<T>::get_plane_basis(const T *v1, const T *n) require
 
 #pragma endregion
 
-#include "VectorSpace_2.tpp"
-#include  "VectorSpace_G.tpp"
-
 #endif //VECTOR_CALCULATOR_VECTORSPACE_H
